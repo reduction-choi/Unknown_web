@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Board from "./Board";
+import Selection from "./Selection";
 import axios from "axios";
 import { socket } from "./socket";
 
@@ -7,11 +8,25 @@ function App() {
   const [username, setUsername] = useState("");
   const [role, setRole] = useState("player");
   const [loggedIn, setLoggedIn] = useState(false);
-
+  const [selectedCell, setSelectedCell] = useState(null);
+  const [cellImages, setCellImages] = useState({});
   const [gameState, setGameState] = useState(null);
-  const [players, setPlayers] = useState([]);
-  const [watchers, setWatchers] = useState([]);
+  const handleCellClick = (cell) => {
+    console.log("Clicked:", cell);
+    setSelectedCell(cell);
+  };
+  const handleImageSelect = (imageNumber) => {
+    if (!selectedCell) return;
 
+    const key = `${selectedCell.coordinate[0]}-${selectedCell.coordinate[1]}`;
+
+    setCellImages((prev) => ({
+      ...prev,
+      [key]: imageNumber
+    }));
+
+    setSelectedCell(null); // close selection after choosing
+  };
   const handleLogin = async () => {
     try {
       await axios.post("https://animated-space-goldfish-g999xg4qjp5hpp9g-3001.app.github.dev/login", {
@@ -32,11 +47,6 @@ function App() {
     socket.on("game_state", (state) => {
       console.log(state);
       setGameState(state);
-    });
-
-    socket.on("users_update", (data) => {
-      setPlayers(data.players);
-      setWatchers(data.watchers);
     });
 
     return () => {
@@ -92,27 +102,17 @@ function App() {
       <h2>Logged in as {username}</h2>
       <h3>Role: {role}</h3>
 
-      <h3>Players</h3>
-      <ul>
-        {players.map((p, i) => (
-          <li key={i}>{p.username}</li>
-        ))}
-      </ul>
-
-      <h3>Watchers</h3>
-      <ul>
-        {watchers.map((w, i) => (
-          <li key={i}>{w.username}</li>
-        ))}
-      </ul>
-
       {gameState && (
         <Board
           board={gameState.board}
           players={gameState.players}
+          onCellClick={handleCellClick}
+          cellImages={cellImages}
         />
       )}
-
+      {selectedCell && (
+        <Selection onSelect={handleImageSelect} />
+      )}
       {role === "player" && (
         <button onClick={makeMove}>Make Move</button>
       )}
