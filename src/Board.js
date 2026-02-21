@@ -1,6 +1,6 @@
 import React from "react";
 
-function Board({ board, players, onCellClick, cellImages }) {
+function Board({ board, players, onCellClick }) {
   return (
     <div
       style={{
@@ -10,14 +10,12 @@ function Board({ board, players, onCellClick, cellImages }) {
       }}
     >
       {board.flat().map((cell, index) => {
-        const key = `${cell.coordinate[0]}-${cell.coordinate[1]}`;
-        const imageNumber = cellImages[key];
         const playerOnCell = players.find(
-          (p) =>
-            p.dicePosition !== null &&
+          (p) => {
+            return p.dicePosition &&
             p.dicePosition[0] === cell.coordinate[0] &&
-            p.dicePosition[1] === cell.coordinate[1]
-        );
+            p.dicePosition[1] === cell.coordinate[1];
+      });
 
         return (
           <div
@@ -39,9 +37,9 @@ function Board({ board, players, onCellClick, cellImages }) {
                 {cell.number}
               </div>
             )}
-            {imageNumber && (
+            {playerOnCell && playerOnCell.diceState !== 0 && (
               <img
-                src={require(`../images/${imageNumber}.jpg`)}
+                src={require(`../images/${playerOnCell.diceState}.png`)}
                 alt="selected"
                 style={{
                   position: "absolute",
@@ -53,7 +51,7 @@ function Board({ board, players, onCellClick, cellImages }) {
                 }}
               />
             )}
-            {playerOnCell && (
+            {playerOnCell && playerOnCell.diceState !== 0 && (
               <div
                 style={{
                   position: "absolute",

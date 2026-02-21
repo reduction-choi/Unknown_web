@@ -1,31 +1,54 @@
 import React, { useState, useEffect } from "react";
 import Board from "./Board";
 import Selection from "./Selection";
+import SelectTurn from "./SelectTurn";
 import axios from "axios";
 import { socket } from "./socket";
 
 function App() {
   const [username, setUsername] = useState("");
   const [role, setRole] = useState("player");
+  const [gameplaying, setGamePlaying] = useState(false);
   const [loggedIn, setLoggedIn] = useState(false);
   const [selectedCell, setSelectedCell] = useState(null);
-  const [cellImages, setCellImages] = useState({});
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [selectedPlayer, setSelectedPlayer] = useState(null);
   const [gameState, setGameState] = useState(null);
   const handleCellClick = (cell) => {
-    console.log("Clicked:", cell);
     setSelectedCell(cell);
+    setSelectedImage(null);
+    setSelectedPlayer(null);
   };
-  const handleImageSelect = (imageNumber) => {
-    if (!selectedCell) return;
+  const handleGameStart = () => {
+    setGamePlaying((prev) => {
+      return !prev;
+    })
+    socket.emit("gameStart");
+  }
+  const handleTurnSelect = (user) => {
+    socket.emit("turn", user);
+  }
+  const handleConfirmMove = () => {
+    if (!selectedCell || selectedImage === null || !selectedPlayer) {
+      return;
+    }
+    // Update local board state
+    // setCellImages((prev) => ({
+    //   ...prev,
+    //   [key]: selectedImage
+    // }));
 
-    const key = `${selectedCell.coordinate[0]}-${selectedCell.coordinate[1]}`;
+    // Optional: emit to backend
+    socket.emit("move", {
+      cell: selectedCell.coordinate,
+      image: selectedImage,
+      player: selectedPlayer
+    });
 
-    setCellImages((prev) => ({
-      ...prev,
-      [key]: imageNumber
-    }));
-
-    setSelectedCell(null); // close selection after choosing
+    // Reset UI
+    setSelectedCell(null);
+    setSelectedImage(null);
+    setSelectedPlayer(null);
   };
   const handleLogin = async () => {
     try {
@@ -55,10 +78,6 @@ function App() {
     };
   }, []);
 
-  const makeMove = () => {
-    socket.emit("make_move", { example: "move" });
-  };
-
   if (!loggedIn) {
     return (
       <div style={{ padding: 40 }}>
@@ -84,11 +103,11 @@ function App() {
           <label>
             <input
               type="radio"
-              value="watcher"
-              checked={role === "watcher"}
+              value="admin"
+              checked={role === "admin"}
               onChange={(e) => setRole(e.target.value)}
             />
-            Watcher
+            Admin
           </label>
         </div>
 
@@ -100,21 +119,40 @@ function App() {
   return (
     <div style={{ padding: 40 }}>
       <h2>Logged in as {username}</h2>
-      <h3>Role: {role}</h3>
-
+      {gameState && <h3>Turn: {gameState.turn}</h3>}
+      {role === "admin" && gameState && (
+        <div>
+        <h2>{gameplaying ? "게임 중" : "시작 전"}</h2>
+        <button
+        style={{
+          marginTop: "20px",
+          padding: "10px 20px",
+          fontWeight: "bold",
+          cursor: "pointer"
+        }}
+        onClick={handleGameStart}
+      >
+        게임 시작/정지
+      </button>
+      <SelectTurn players={gameState.players} onTurnSelect={handleTurnSelect}/>
+      </div>
+      )}
       {gameState && (
         <Board
           board={gameState.board}
           players={gameState.players}
           onCellClick={handleCellClick}
-          cellImages={cellImages}
         />
       )}
-      {selectedCell && (
-        <Selection onSelect={handleImageSelect} />
-      )}
-      {role === "player" && (
-        <button onClick={makeMove}>Make Move</button>
+      {role === "admin" && selectedCell && (
+        <Selection
+          players={gameState.players}
+          selectedImage={selectedImage}
+          selectedPlayer={selectedPlayer}
+          onImageSelect={setSelectedImage}
+          onPlayerSelect={setSelectedPlayer}
+          onConfirm={handleConfirmMove}
+        />
       )}
     </div>
   );
