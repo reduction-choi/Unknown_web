@@ -1,6 +1,6 @@
 import { io } from "socket.io-client";
 
-export const socket = io("https://animated-space-goldfish-g999xg4qjp5hpp9g-3001.app.github.dev/", {
+export const socket = io("https://unknown-backend-baac.onrender.com/", {
   autoConnect: false,
   transports: ["websocket"]
 });
