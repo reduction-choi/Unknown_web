@@ -115,35 +115,48 @@ function App() {
       </div>
     );
   }
-
   return (
-    <div style={{ padding: 40 }}>
+  <div
+    style={{
+      height: "100vh",
+      display: "flex",
+      padding: "20px",
+      boxSizing: "border-box"
+    }}
+  >
+    {/* LEFT PANEL */}
+    <div
+      style={{
+        flex: 1.4,              // ⬅ bigger than before
+        paddingRight: "20px",
+        overflowY: "auto"
+      }}
+    >
       <h2>Logged in as {username}</h2>
       {gameState && <h3>Turn: {gameState.turn}</h3>}
       {role === "admin" && gameState && (
         <div>
-        <h2>{gameplaying ? "게임 중" : "시작 전"}</h2>
-        <button
-        style={{
-          marginTop: "20px",
-          padding: "10px 20px",
-          fontWeight: "bold",
-          cursor: "pointer"
-        }}
-        onClick={handleGameStart}
-      >
-        게임 시작/정지
-      </button>
-      <SelectTurn players={gameState.players} onTurnSelect={handleTurnSelect}/>
-      </div>
+          <h2>{gameplaying ? "게임 중" : "시작 전"}</h2>
+          <button
+            style={{
+              marginTop: "20px",
+              padding: "10px 20px",
+              fontWeight: "bold",
+              cursor: "pointer"
+            }}
+            onClick={handleGameStart}
+          >
+            게임 시작/정지
+          </button>
+
+          <SelectTurn
+            players={gameState.players}
+            onTurnSelect={handleTurnSelect}
+          />
+          {selectedCell && <h2>({selectedCell.coordinate[0]}, {selectedCell.coordinate[1]})</h2>}
+        </div>
       )}
-      {gameState && (
-        <Board
-          board={gameState.board}
-          players={gameState.players}
-          onCellClick={handleCellClick}
-        />
-      )}
+
       {role === "admin" && selectedCell && (
         <Selection
           players={gameState.players}
@@ -155,7 +168,26 @@ function App() {
         />
       )}
     </div>
-  );
+
+    {/* RIGHT PANEL (BOARD) */}
+    <div
+      style={{
+        flex: 1,
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center"
+      }}
+    >
+      {gameState && (
+        <Board
+          board={gameState.board}
+          players={gameState.players}
+          onCellClick={handleCellClick}
+        />
+      )}
+    </div>
+  </div>
+);
 }
 
 export default App;
