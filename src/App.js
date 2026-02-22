@@ -22,10 +22,10 @@ function App() {
     setSelectedPlayer(null);
   };
   const handleGameStart = () => {
-    setGamePlaying((prev) => {
-      return !prev;
-    })
     socket.emit("gameStart");
+  }
+  const handleReset = () => {
+    socket.emit("reset");
   }
   const handleTurnSelect = (user) => {
     socket.emit("turn", user);
@@ -75,10 +75,13 @@ function App() {
       console.log(state);
       setGameState(state);
     });
+    socket.on("gamePlaying", (state) => {
+      setGamePlaying(state);
+    });
 
     return () => {
       socket.off("game_state");
-      socket.off("users_update");
+      socket.off("gamePlaying");
     };
   }, []);
   if (loading) {
@@ -141,7 +144,8 @@ function App() {
           paddingRight: role === "admin" ? "20px" : "0px",
           overflowY: "auto"
         }}
-      >{role === "player" && gameState && (
+      >
+      {role === "player" && gameState && (
         <h3 style={{
           marginBottom: "10px",
           fontSize: "26px",
@@ -168,7 +172,17 @@ function App() {
             >
               게임 시작/정지
             </button>
-
+            <button
+              style={{
+                marginTop: "20px",
+                padding: "10px 20px",
+                fontWeight: "bold",
+                cursor: "pointer"
+              }}
+              onClick={handleReset}
+            >
+              플레이어 초기화
+            </button>
             <SelectTurn
               players={gameState.players}
               onTurnSelect={handleTurnSelect}
