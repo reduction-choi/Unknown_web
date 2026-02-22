@@ -1,13 +1,17 @@
 import React from "react";
 
 function Board({ board, players, onCellClick }) {
+
+  const boardSize = "min(90vw, 900px)";   // 화면 너비의 90%
+  const cellSize =  "calc(min(90vw, 900px) / 13)";
   return (
     <div
       style={{
         display: "grid",
-        gridTemplateColumns: "repeat(13, 70px)",   // bigger board
-        gridTemplateRows: "repeat(13, 70px)",
-        gap: "0px"
+        width: boardSize,
+        height: boardSize,
+        gridTemplateColumns: `repeat(13, ${cellSize})`,
+        gridTemplateRows: `repeat(13, ${cellSize})`
       }}
     >
       {board.flat().map((cell, index) => {
@@ -23,8 +27,8 @@ function Board({ board, players, onCellClick }) {
             key={index}
             onClick={() => onCellClick(cell)}
             style={{
-              width: 70,
-              height: 70,
+              width: "100%",
+              height: "100%",
               backgroundColor:
                 cell.color === "blank" ? "#eee" : cell.color,
               border: "1px solid black",
@@ -65,7 +69,7 @@ function Board({ board, players, onCellClick }) {
                   textShadow: "2px 2px 4px black"
                 }}
               >
-                {cell.number===1000 ? "G" : cell.number}
+                {cell.number === 1000 ? "G" : cell.number}
               </div>
             )}
 
