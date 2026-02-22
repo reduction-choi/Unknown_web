@@ -63,7 +63,7 @@ function Board({ board, players, onCellClick }) {
                 style={{
                   position: "absolute",
                   zIndex: 2,                // ⬅ critical
-                  fontSize: "26px",
+                  fontSize: "clamp(10px, 2vw, 26px)",
                   fontWeight: "bold",
                   color: "white",
                   textShadow: "2px 2px 4px black"
@@ -80,7 +80,7 @@ function Board({ board, players, onCellClick }) {
                   position: "absolute",
                   bottom: 2,
                   right: 4,
-                  fontSize: "11px",
+                  fontSize: "clamp(6px, 1.2vw, 11px)",
                   fontWeight: "bold",
                   zIndex: 3,
                   color: "white",
